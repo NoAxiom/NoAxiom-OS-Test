@@ -28,3 +28,10 @@ $(KERNEL_IMG): $(TARGET_LA) $(TARGET_RV)
 
 all: $(KERNEL_IMG)
 	@echo -e $(NORMAL)"NoAxiom-OS Test Suite Complete."$(RESET)
+
+clean:
+	rm -rf $(ROOT)/official/mnt
+	rm -rf $(ROOT)/official/doc
+	rm -rf $(ROOT)/official/tmp
+
+.PHONY: all doc

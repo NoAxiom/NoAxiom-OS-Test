@@ -5,6 +5,10 @@ export WARN := "\e[33m"
 export NORMAL := "\e[32m"
 export RESET := "\e[0m"
 
+export ARCH_NAME ?= riscv64
+
+TARGET_IMG := img/fs-$(ARCH_NAME).img
+
 all:
 	@echo $(NORMAL)"NoAxiom-OS Test Suite"$(RESET)
 	mkdir -p tmp
@@ -17,7 +21,34 @@ all:
 	mv tmp/sdcard-rv.img img/sdcard-rv.img
 	rm -rf tmp
 
+doc: 
+	git clone https://github.com/oscomp/oskernel-testsuits-cooperation.git ./doc
+
+mount:
+	mkdir -p ./mnt
+	mountpoint -q ./mnt || sudo mount -t ext4 $(TARGET_IMG) ./mnt
+	@echo -e $(NORMAL)"Mounting $(TARGET_IMG) to mnt succeed!"$(RESET)
+
+umount:
+	sudo umount ./mnt
+	rm -rf ./mnt
+
+TEST_POINT := 
+TEST_POINT += busybox_testcode.sh
+TEST_RUNBASE += sudo qemu-$(ARCH_NAME) ./busybox
+
+list:
+	@cd mnt/glibc && $(TEST_RUNBASE) ls
+
+trace: mount
+	mkdir -p ./trace
+	@cd mnt/glibc && \
+	for test in $(TEST_POINT); do \
+		$(TEST_RUNBASE) sh $$test > ../../trace/$$test.txt; \
+		echo -e $(NORMAL)"Generate $$test trace done."$(RESET); \
+	done
+
 clean:
 	rm -rf tmp
 
-.PHONY: all clean 
+.PHONY: all clean mount umount trace

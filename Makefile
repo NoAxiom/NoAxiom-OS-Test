@@ -1,6 +1,7 @@
 # NoAxiom-OS-Test Makefile
 
 # general config
+export ARCH_NAME ?= riscv64
 export TEST_TYPE ?= Official
 
 ROOT = $(shell pwd)
@@ -29,9 +30,10 @@ $(KERNEL_IMG): $(TARGET_LA) $(TARGET_RV)
 all: $(KERNEL_IMG)
 	@echo -e $(NORMAL)"NoAxiom-OS Test Suite Complete."$(RESET)
 
+trace:
+	@cd $(TARGET_DIR) && make trace
+
 clean:
-	rm -rf $(ROOT)/official/mnt
-	rm -rf $(ROOT)/official/doc
-	rm -rf $(ROOT)/official/tmp
+	@cd $(TARGET_DIR) && make clean
 
 .PHONY: all doc

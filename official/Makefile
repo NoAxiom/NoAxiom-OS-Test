@@ -27,7 +27,7 @@ doc:
 mount:
 	mkdir -p ./mnt
 	mountpoint -q ./mnt || sudo mount -t ext4 $(TARGET_IMG) ./mnt
-	@echo -e $(NORMAL)"Mounting $(TARGET_IMG) to mnt succeed!"$(RESET)
+	@echo -e $(NORMAL)"Mount $(TARGET_IMG) to mnt succeed!"$(RESET)
 
 umount:
 	sudo umount ./mnt
@@ -38,19 +38,43 @@ TEST_POINT :=
 TEST_POINT += busybox_testcode.sh
 TEST_RUNBASE += sudo $(USER_QEMU) ./busybox
 
+MODIFIED_FILE := 
+MODIFIED_FILE += busybox_cmd.txt
+MODIFIED_FILE += busybox_testcode.sh
+
 list:
 	@cd mnt/glibc && $(TEST_RUNBASE) ls
 
 trace: mount
-	@echo -e $(WARN)"Make sure that the img is right at LA arch!"$(RESET)
 	mkdir -p ./trace
 	@cd mnt/glibc && \
+	for modify in $(MODIFIED_FILE); do \
+		$(TEST_RUNBASE) sed -i 's/\.\/busybox/busybox/g' $$modify; \
+	done; \
 	for test in $(TEST_POINT); do \
-		$(TEST_RUNBASE) sh $$test > ../../trace/$(ARCH_NAME)-$$test.txt; \
+		$(TEST_RUNBASE) sed -i 's/\.\/busybox/busybox/g' $$test; \
+		$(TEST_RUNBASE) \
+		sh -c "strace -o ../../trace/$(ARCH_NAME)-strace-$$test.txt \
+		sh $$test > ../../trace/$(ARCH_NAME)-$$test.txt"; \
 		echo -e $(NORMAL)"Generate $$test trace done."$(RESET); \
 	done
+	make umount
 
 clean:
+	rm -rf trace
 	rm -rf tmp
+	mountpoint -q ./mnt && make umount
 
-.PHONY: all clean mount umount trace
+help:
+	@echo -e $(WARN)"Usage: make [target]"$(RESET)
+	@echo -e $(WARN)"'*' is represent in common use."$(RESET)
+	@echo -e ""
+	@echo -e $(NORMAL)"Targets:"$(RESET)
+	@echo -e $(NORMAL)"  all        Download and extract test images."$(RESET)
+	@echo -e $(NORMAL)"  mount      Mount the image to ./mnt."$(RESET)
+	@echo -e $(NORMAL)"  umount     Unmount the image from ./mnt."$(RESET)
+	@echo -e $(NORMAL)" *trace      Run tests and generate trace files."$(RESET)
+	@echo -e $(NORMAL)"  clean      Clean up temporary files."$(RESET)
+	@echo -e $(NORMAL)"  help       Show this help message."$(RESET)
+
+.PHONY: all clean mount umount trace help

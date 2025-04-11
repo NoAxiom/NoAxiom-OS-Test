@@ -1,5 +1,11 @@
 # NoAxiom-OS-Test Makefile
 
+# console output colors
+export ERROR := "\e[31m"
+export WARN := "\e[33m"
+export NORMAL := "\e[32m"
+export RESET := "\e[0m"
+
 # general config
 export ARCH_NAME ?= riscv64
 export TEST_TYPE ?= Official
@@ -32,6 +38,7 @@ all: $(KERNEL_IMG)
 
 trace:
 	@cd $(TARGET_DIR) && make trace
+	@echo -e $(NORMAL)"see ./official/trace for trace result"$(RESET)
 
 clean:
 	@cd $(TARGET_DIR) && make clean

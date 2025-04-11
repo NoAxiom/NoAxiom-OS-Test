@@ -5,7 +5,7 @@ export WARN := "\e[33m"
 export NORMAL := "\e[32m"
 export RESET := "\e[0m"
 
-export ARCH_NAME ?= riscv64
+export ARCH_NAME ?= loongarch64
 
 TARGET_IMG := img/fs-$(ARCH_NAME).img
 
@@ -33,18 +33,20 @@ umount:
 	sudo umount ./mnt
 	rm -rf ./mnt
 
+USER_QEMU := $(shell which qemu-$(ARCH_NAME))
 TEST_POINT := 
 TEST_POINT += busybox_testcode.sh
-TEST_RUNBASE += sudo qemu-$(ARCH_NAME) ./busybox
+TEST_RUNBASE += sudo $(USER_QEMU) ./busybox
 
 list:
 	@cd mnt/glibc && $(TEST_RUNBASE) ls
 
 trace: mount
+	@echo -e $(WARN)"Make sure that the img is right at LA arch!"$(RESET)
 	mkdir -p ./trace
 	@cd mnt/glibc && \
 	for test in $(TEST_POINT); do \
-		$(TEST_RUNBASE) sh $$test > ../../trace/$$test.txt; \
+		$(TEST_RUNBASE) sh $$test > ../../trace/$(ARCH_NAME)-$$test.txt; \
 		echo -e $(NORMAL)"Generate $$test trace done."$(RESET); \
 	done
 

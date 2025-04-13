@@ -54,7 +54,7 @@ trace: mount
 	for test in $(TEST_POINT); do \
 		$(TEST_RUNBASE) sed -i 's/\.\/busybox/busybox/g' $$test; \
 		$(TEST_RUNBASE) \
-		sh -c "strace -o ../../trace/$(ARCH_NAME)-strace-$$test.txt \
+		sh -c "strace -f -o ../../trace/$(ARCH_NAME)-strace-$$test.txt \
 		sh $$test > ../../trace/$(ARCH_NAME)-$$test.txt"; \
 		echo -e $(NORMAL)"Generate $$test trace done."$(RESET); \
 	done

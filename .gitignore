@@ -3,3 +3,4 @@ tmp/
 trace/
 doc/
 mnt/
+.vscode-ctags

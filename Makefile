@@ -8,37 +8,26 @@ export RESET := "\e[0m"
 
 # general config
 export ARCH_NAME ?= riscv64
-export TEST_TYPE ?= Official
+export LIB_NAME  ?= glibc
+export TEST_TYPE ?= official
 
-ROOT = $(shell pwd)
-
-ifeq ($(TEST_TYPE),Official)
-	TARGET_DIR = $(ROOT)/official
+ifeq ($(TEST_TYPE),official)
+	TARGET_DIR = ./official
 else
-	TARGET_DIR = $(ROOT)/custom
+	TARGET_DIR = ./custom
 endif
 
-TARGET_LA := $(TARGET_DIR)/img/sdcard-la.img
-TARGET_RV := $(TARGET_DIR)/img/sdcard-rv.img
+RAW_FS_IMG := $(TEST_TYPE)/img/$(ARCH_NAME)-$(LIB_NAME).img
 
-KERNEL_IMG_LA := fs-loongarch64.img
-KERNEL_IMG_RV := fs-riscv64.img
-KERNEL_IMG := $(KERNEL_IMG_LA) $(KERNEL_IMG_RV)
-
-$(TARGET_LA) $(TARGET_RV):
-	@echo $(TEST_TYPE)
+$(RAW_FS_IMG):
 	@cd $(TARGET_DIR) && make all
 
-$(KERNEL_IMG): $(TARGET_LA) $(TARGET_RV)
-	@cp $(TARGET_LA) $(KERNEL_IMG_LA)
-	@cp $(TARGET_RV) $(KERNEL_IMG_RV)
-
-all: $(KERNEL_IMG)
+all: $(RAW_FS_IMG)
 	@echo -e $(NORMAL)"NoAxiom-OS Test Suite Complete."$(RESET)
 
 trace:
 	@cd $(TARGET_DIR) && make trace
-	@echo -e $(NORMAL)"see ./official/trace for trace result"$(RESET)
+	@echo -e $(NORMAL)"see $(TARGET_DIR)/trace for trace result"$(RESET)
 
 clean:
 	@cd $(TARGET_DIR) && make clean

@@ -8,7 +8,7 @@ export RESET := "\e[0m"
 
 # general config
 export ARCH_NAME ?= riscv64
-export LIB_NAME  ?= glibc
+export LIB_NAME  ?= musl
 export TEST_TYPE ?= official
 
 ifeq ($(TEST_TYPE),official)

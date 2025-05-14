@@ -17,13 +17,22 @@ else
 	TARGET_DIR = ./custom
 endif
 
-RAW_FS_IMG := $(TEST_TYPE)/img/$(ARCH_NAME)-$(LIB_NAME).img
+# fs img config
+TEST_DIR ?= $(shell pwd)
+RAW_FS_IMG ?= $(TEST_TYPE)/img/$(ARCH_NAME)-$(LIB_NAME).img
+FS_IMG_DIR ?= $(TEST_DIR)/$(TEST_TYPE)/tmp-img
+FS_IMG ?= $(TEST_TYPE)/tmp-img/$(ARCH_NAME)-$(LIB_NAME).fs.img
+
+CHECKER_PY ?= $(TEST_DIR)/utils/checker.py
+check: $(FS_IMG)
+	@python3 $(CHECKER_PY) check_or_copy --src $(RAW_FS_IMG) --dest $(FS_IMG)
+
+$(FS_IMG): $(RAW_FS_IMG)
+	@mkdir -p $(FS_IMG_DIR)
+	@cp $(RAW_FS_IMG) $(FS_IMG)
 
 $(RAW_FS_IMG):
 	@cd $(TARGET_DIR) && make all
-
-all: $(RAW_FS_IMG)
-	@echo -e $(NORMAL)"NoAxiom-OS Test Suite Complete."$(RESET)
 
 trace:
 	@cd $(TARGET_DIR) && make trace
@@ -32,4 +41,4 @@ trace:
 clean:
 	@cd $(TARGET_DIR) && make clean
 
-.PHONY: all doc
+.PHONY: trace clean check

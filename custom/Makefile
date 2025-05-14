@@ -6,7 +6,7 @@ export NORMAL := "\e[32m"
 export RESET := "\e[0m"
 
 export ARCH_NAME ?= riscv64
-export LIB_NAME ?= glibc
+export LIB_NAME ?= musl
 
 TARGET_IMG := img/fs-$(ARCH_NAME).img
 USER_QEMU := $(shell which qemu-$(ARCH_NAME))
@@ -36,7 +36,7 @@ img/fs-riscv64.img:
 	rm -rf tmp
 
 images:
-	cp -n img/fs-riscv64.img img/riscv64-glibc.img
+	cp -n img/fs-riscv64.img img/$(ARCH_NAME)-$(LIB_NAME).img
 
 mount:
 	mkdir -p ./mnt

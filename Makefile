@@ -8,6 +8,7 @@ export RESET := "\e[0m"
 
 # general config
 export ARCH_NAME ?= riscv64
+export SIMPLE_ARCH_NAME ?= rv
 export LIB_NAME  ?= musl
 export TEST_TYPE ?= official
 
@@ -19,9 +20,9 @@ endif
 
 # fs img config
 TEST_DIR ?= $(shell pwd)
-RAW_FS_IMG ?= $(TEST_TYPE)/img/$(ARCH_NAME)-$(LIB_NAME).img
+RAW_FS_IMG ?= $(TEST_TYPE)/img/fs-$(ARCH_NAME).img
 FS_IMG_DIR ?= $(TEST_DIR)/$(TEST_TYPE)/tmp-img
-FS_IMG ?= $(TEST_TYPE)/tmp-img/$(ARCH_NAME)-$(LIB_NAME).fs.img
+FS_IMG ?= $(TEST_TYPE)/tmp-img/fs-$(ARCH_NAME).fs.img
 
 all: $(RAW_FS_IMG)
 	@echo -e $(NORMAL)"NoAxiom-OS Test Suite Complete."$(RESET)

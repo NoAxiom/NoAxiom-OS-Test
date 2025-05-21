@@ -36,7 +36,7 @@ img/fs-riscv64.img:
 	rm -rf tmp
 
 images:
-	cp -n img/fs-riscv64.img img/$(ARCH_NAME)-$(LIB_NAME).img
+	cp -n img/fs-riscv64.img img/$(ARCH_NAME).img
 
 mount:
 	mkdir -p ./mnt

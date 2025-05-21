@@ -21,34 +21,40 @@ MODIFIED_FILE :=
 # MODIFIED_FILE += busybox_cmd.txt
 # MODIFIED_FILE += busybox_testcode.sh
 
-all: img/fs-loongarch64.img images
+all: $(TARGET_IMG)
 
-# 如果下载不了，手动下载并解压到img目录下，重命名为 fs-riscv64.img 和 fs-loongarch64.img，并且手动执行 make images
-img/fs-loongarch64.img:
-	@echo -e $(NORMAL)"NoAxiom-OS Test Suite"$(RESET)
+download:
 	mkdir -p tmp
-	mkdir -p img
-	wget -O tmp/sdcard-la.img.gz https://github.com/oscomp/testsuits-for-oskernel/releases/download/pre-20250506/sdcard-la.img.gz
-	wget -O tmp/sdcard-rv.img.gz https://github.com/oscomp/testsuits-for-oskernel/releases/download/pre-20250506/sdcard-rv.img.gz
-	gunzip tmp/sdcard-la.img.gz
-	gunzip tmp/sdcard-rv.img.gz
-	mv tmp/sdcard-la.img img/fs-loongarch64.img
-	mv tmp/sdcard-rv.img img/fs-riscv64.img
-	rm -rf tmp
+	wget -O tmp/sdcard-la.img.gz https://github.com/oscomp/testsuits-for-oskernel/releases/download/pre-20250513/sdcard-la.img.gz
+	wget -O tmp/sdcard-rv.img.gz https://github.com/oscomp/testsuits-for-oskernel/releases/download/pre-20250513/sdcard-rv.img.gz
 
-images: 
-	make mount ARCH_NAME=riscv64
-	sudo python3 images.py glibc
-	mv -f img/glibc.img img/riscv64-glibc.img
-	sudo python3 images.py musl
-	mv -f img/musl.img img/riscv64-musl.img
-	make umount
-	make mount ARCH_NAME=loongarch64
-	sudo python3 images.py glibc
-	mv -f img/glibc.img img/loongarch64-glibc.img
-	sudo python3 images.py musl
-	mv -f img/musl.img img/loongarch64-musl.img
-	make umount
+tmp/sdcard-la.img: tmp/sdcard-la.img.gz
+	gunzip tmp/sdcard-la.img.gz
+
+tmp/sdcard-rv.img: tmp/sdcard-rv.img.gz
+	gunzip tmp/sdcard-rv.img.gz
+
+img/fs-loongarch64.img: tmp/sdcard-la.img
+	mkdir -p img
+	mv tmp/sdcard-la.img img/fs-loongarch64.img
+
+img/fs-riscv64.img: tmp/sdcard-rv.img
+	mkdir -p img
+	mv tmp/sdcard-rv.img img/fs-riscv64.img
+
+# images: 
+# 	make mount ARCH_NAME=riscv64
+# 	sudo python3 images.py glibc
+# 	mv -f img/glibc.img img/riscv64-glibc.img
+# 	sudo python3 images.py musl
+# 	mv -f img/musl.img img/riscv64-musl.img
+# 	make umount
+# 	make mount ARCH_NAME=loongarch64
+# 	sudo python3 images.py glibc
+# 	mv -f img/glibc.img img/loongarch64-glibc.img
+# 	sudo python3 images.py musl
+# 	mv -f img/musl.img img/loongarch64-musl.img
+# 	make umount
 
 doc: 
 	git clone https://github.com/oscomp/oskernel-testsuits-cooperation.git ./doc
@@ -96,4 +102,4 @@ help:
 	@echo -e $(NORMAL)"  clean      Clean up temporary files."$(RESET)
 	@echo -e $(NORMAL)"  help       Show this help message."$(RESET)
 
-.PHONY: all images clean mount umount trace help
+.PHONY: all images clean mount umount trace help download

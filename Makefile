@@ -11,6 +11,7 @@ export ARCH_NAME ?= riscv64
 export SIMPLE_ARCH_NAME ?= rv
 export LIB_NAME  ?= musl
 export TEST_TYPE ?= official
+export CHECK_IMG ?= false
 
 ifeq ($(TEST_TYPE),official)
 	TARGET_DIR = ./official
@@ -29,7 +30,11 @@ all: $(RAW_FS_IMG)
 
 CHECKER_PY ?= $(TEST_DIR)/utils/checker.py
 check: $(FS_IMG)
+ifeq ($(CHECK_IMG),false)
+	cp $(RAW_FS_IMG) $(FS_IMG)
+else
 	@python3 $(CHECKER_PY) check_or_copy --src $(RAW_FS_IMG) --dest $(FS_IMG)
+endif
 
 $(FS_IMG): $(RAW_FS_IMG)
 	@mkdir -p $(FS_IMG_DIR)

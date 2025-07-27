@@ -21,9 +21,9 @@ endif
 
 # fs img config
 TEST_DIR ?= $(shell pwd)
-RAW_FS_IMG ?= $(TEST_TYPE)/img/fs-$(ARCH_NAME).img
+RAW_FS_IMG ?= $(TEST_TYPE)/img/fs-$(ARCH_NAME)$(IMG_SUFFIX).img
 FS_IMG_DIR ?= $(TEST_DIR)/$(TEST_TYPE)/tmp-img
-FS_IMG ?= $(TEST_TYPE)/tmp-img/fs-$(ARCH_NAME).fs.img
+FS_IMG ?= $(TEST_TYPE)/tmp-img/fs-$(ARCH_NAME)$(IMG_SUFFIX).fs.img
 
 all: $(RAW_FS_IMG)
 	@echo -e $(NORMAL)"NoAxiom-OS Test Suite Complete."$(RESET)

@@ -22,6 +22,7 @@ endif
 # fs img config
 TEST_DIR ?= $(shell pwd)
 RAW_FS_IMG ?= $(TEST_TYPE)/img/fs-$(ARCH_NAME)$(IMG_SUFFIX).img
+RAW_FS_IMG_XZ ?= $(TEST_TYPE)/img/sdcard-$(SIMPLE_ARCH_NAME)$(IMG_SUFFIX).img.xz
 FS_IMG_DIR ?= $(TEST_DIR)/$(TEST_TYPE)/tmp-img
 FS_IMG ?= $(TEST_TYPE)/tmp-img/fs-$(ARCH_NAME)$(IMG_SUFFIX).fs.img
 
@@ -31,10 +32,12 @@ all: $(RAW_FS_IMG)
 CHECKER_PY ?= $(TEST_DIR)/utils/checker.py
 check: $(FS_IMG)
 ifeq ($(CHECK_IMG),false)
-	cp $(RAW_FS_IMG) $(FS_IMG)
+	@echo $(NORMAL)"Skipping image check, copying raw image directly."$(RESET)
+	@pv $(RAW_FS_IMG) > $(FS_IMG)
 else
 	@python3 $(CHECKER_PY) check_or_copy --src $(RAW_FS_IMG) --dest $(FS_IMG)
 endif
+	@echo -e $(NORMAL)"Image completed."$(RESET)
 
 $(FS_IMG): $(RAW_FS_IMG)
 	@mkdir -p $(FS_IMG_DIR)

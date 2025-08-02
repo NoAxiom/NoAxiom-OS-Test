@@ -57,11 +57,12 @@ def check_or_copy(src_path, dest_path):
     else:
         logging.info(f"Image does not exist at {dest_path}! Copying new image to {dest_path}.")
     
-    shutil.copy2(src_path, dest_path)
+    copy_image(src_path, dest_path)
     logging.info(f"Copied image from {src_path} to {dest_path}.")
 
 def copy_image(src_path, dest_path):
-    shutil.copy2(src_path, dest_path)
+    pv_command = f"pv '{src_path}' > '{dest_path}'"
+    os.system(pv_command)
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)

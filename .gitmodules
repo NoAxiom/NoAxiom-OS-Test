@@ -1,0 +1,3 @@
+[submodule "official/img"]
+	path = official/img
+	url = https://github.com/YuXuaann/CSCC-2025-images.git

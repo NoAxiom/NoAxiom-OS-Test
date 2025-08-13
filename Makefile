@@ -9,48 +9,57 @@ export RESET := "\e[0m"
 # general config
 export ARCH_NAME ?= riscv64
 export SIMPLE_ARCH_NAME ?= rv
-export LIB_NAME  ?= musl
 export TEST_TYPE ?= official
-export CHECK_IMG ?= false
+export TEST_STAGE ?= pre-2025
 
 ifeq ($(TEST_TYPE),official)
 	TARGET_DIR = ./official
 else
-	TARGET_DIR = ./custom
+	echo -e $(ERROR)"Unsupported TEST_TYPE: $(TEST_TYPE). Defaulting to 'official'."$(RESET)
+	TARGET_DIR = ./official
 endif
 
 # fs img config
-TEST_DIR ?= $(shell pwd)
-RAW_FS_IMG ?= $(TEST_TYPE)/img/fs-$(ARCH_NAME)$(IMG_SUFFIX).img
-RAW_FS_IMG_XZ ?= $(TEST_TYPE)/img/sdcard-$(SIMPLE_ARCH_NAME)$(IMG_SUFFIX).img.xz
-FS_IMG_DIR ?= $(TEST_DIR)/$(TEST_TYPE)/tmp-img
-FS_IMG ?= $(TEST_TYPE)/tmp-img/fs-$(ARCH_NAME)$(IMG_SUFFIX).fs.img
+TEST_DIR 	  	:= $(shell pwd)
+FS_IMG_GZ_DIR 	:= $(TEST_DIR)/$(TEST_TYPE)/img/$(TEST_STAGE)
+FS_IMG_GZ     	:= $(FS_IMG_GZ_DIR)/sdcard-$(SIMPLE_ARCH_NAME).img.gz
+TEST_IMG_DIR 	:= $(TEST_DIR)/$(TEST_TYPE)/tmp-img
+TEST_IMG 		:= $(TEST_IMG_DIR)/fs-$(SIMPLE_ARCH_NAME)-$(TEST_STAGE).img
+EXTRACT_SCRIPT 	:= $(TEST_DIR)/utils/extract.sh
 
-all: $(RAW_FS_IMG)
+all: check
 	@echo -e $(NORMAL)"NoAxiom-OS Test Suite Complete."$(RESET)
 
-CHECKER_PY ?= $(TEST_DIR)/utils/checker.py
-check: $(FS_IMG)
-ifeq ($(CHECK_IMG),false)
-	@echo $(NORMAL)"Skipping image check, copying raw image directly."$(RESET)
-	@pv $(RAW_FS_IMG) > $(FS_IMG)
-else
-	@python3 $(CHECKER_PY) check_or_copy --src $(RAW_FS_IMG) --dest $(FS_IMG)
-endif
-	@echo -e $(NORMAL)"Image completed."$(RESET)
+check: 
+	@cd $(TEST_DIR)/$(TEST_TYPE) && $(MAKE) check
+	@if [ ! -f $(TEST_IMG) ]; then \
+		echo -e $(NORMAL)"This is your first run, extracting..."$(RESET); \
+		$(MAKE) extract; \
+	fi
 
-$(FS_IMG): $(RAW_FS_IMG)
-	@mkdir -p $(FS_IMG_DIR)
-	@cp $(RAW_FS_IMG) $(FS_IMG)
+extract: $(FS_IMG_GZ)
+	@echo -e $(NORMAL)"Extracting... Make sure you have gunzip installed."$(RESET)
+	@mkdir -p $(TEST_IMG_DIR)
+	@$(EXTRACT_SCRIPT) $(FS_IMG_GZ) $(TEST_IMG)
+	@echo -e $(NORMAL)"Extraction complete."$(RESET)
 
-$(RAW_FS_IMG):
-	@cd $(TARGET_DIR) && make all
+mount: extract
+	mkdir -p ./mnt
+	mountpoint -q ./mnt || sudo mount -t ext4 $(TEST_IMG) ./mnt
+	@echo -e $(NORMAL)"Mount $(TEST_IMG) to mnt succeed!"$(RESET)
 
-trace:
-	@cd $(TARGET_DIR) && make trace
-	@echo -e $(NORMAL)"see $(TARGET_DIR)/trace for trace result"$(RESET)
+umount:
+	sudo umount ./mnt
+	rm -rf ./mnt
+
+git-update:
+	@echo -e $(NORMAL)"Updating git submodules..."$(RESET)
+	git submodule sync
+	git submodule update --init --recursive
+	@echo -e $(NORMAL)"Git submodules updated."$(RESET)
 
 clean:
 	@cd $(TARGET_DIR) && make clean
+	mountpoint -q ./mnt && make umount
 
-.PHONY: trace clean check
+.PHONY: all check clean
